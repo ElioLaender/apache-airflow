@@ -1,0 +1,15 @@
+[2022-02-28 16:54:27,277] {taskinstance.py:670} INFO - Dependencies all met for <TaskInstance: example_python_operator.sleep_for_2 2022-02-28T19:49:33.200690+00:00 [queued]>
+[2022-02-28 16:54:27,285] {taskinstance.py:670} INFO - Dependencies all met for <TaskInstance: example_python_operator.sleep_for_2 2022-02-28T19:49:33.200690+00:00 [queued]>
+[2022-02-28 16:54:27,285] {taskinstance.py:880} INFO - 
+--------------------------------------------------------------------------------
+[2022-02-28 16:54:27,285] {taskinstance.py:881} INFO - Starting attempt 2 of 2
+[2022-02-28 16:54:27,285] {taskinstance.py:882} INFO - 
+--------------------------------------------------------------------------------
+[2022-02-28 16:54:27,298] {taskinstance.py:901} INFO - Executing <Task(PythonOperator): sleep_for_2> on 2022-02-28T19:49:33.200690+00:00
+[2022-02-28 16:54:27,300] {standard_task_runner.py:54} INFO - Started process 46445 to run task
+[2022-02-28 16:54:27,380] {standard_task_runner.py:77} INFO - Running: ['airflow', 'run', 'example_python_operator', 'sleep_for_2', '2022-02-28T19:49:33.200690+00:00', '--job_id', '11', '--pool', 'default_pool', '--raw', '-sd', '/home/laender/Documentos/Github/apache-airflow/data-pipeline/.env/lib/python3.8/site-packages/airflow/example_dags/example_python_operator.py', '--cfg_path', '/tmp/tmp1hj0up6j']
+[2022-02-28 16:54:27,381] {standard_task_runner.py:78} INFO - Job 11: Subtask sleep_for_2
+[2022-02-28 16:54:27,412] {logging_mixin.py:112} INFO - Running <TaskInstance: example_python_operator.sleep_for_2 2022-02-28T19:49:33.200690+00:00 [running]> on host laender-Inspiron-5547
+[2022-02-28 16:54:27,635] {python_operator.py:114} INFO - Done. Returned value was: None
+[2022-02-28 16:54:27,647] {taskinstance.py:1057} INFO - Marking task as SUCCESS.dag_id=example_python_operator, task_id=sleep_for_2, execution_date=20220228T194933, start_date=20220228T195427, end_date=20220228T195427
+[2022-02-28 16:54:32,264] {local_task_job.py:102} INFO - Task exited with return code 0

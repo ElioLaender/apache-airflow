@@ -1,0 +1,351 @@
+* API Twitters Recentes:
+https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent
+
+* Chaves API Twitter
+
+API Key: XXXXXXXXXX
+
+API Key Secret: XXXXXXXXXX 
+
+Bearer Token: XXXXXXXXXX
+
+Access Token: XXXXXXXXXX
+
+Access Token Secret: XXXXXXXXXX 
+
+--------------------------------------------------------------------------
+
+Conceito de datas Pipelines:
+
+É uma cadeia de processos/fluxos de trabalho, também chamados de workflows. 
+
+Pipelines realizam a manipulação de dados, geralmente seguindo os passos de ETL ou ELT.
+
+
+A Ideia de pipeline, é a ligação entre o produtor(origem dos dados) e o consumidor(Ambiente de análise)
+
+
+Existem dois modelos de processamento de dados em um data pipeline, sendo:
+
+Batch - Lotes/Pacotes: Neste formato é agrupado uma quantidade de dados para serem processados de [tempos em tempos]. Por exemplo, pode ser agrupado dados de um dia de informações de determinado sistema. Sendo esse pacote transferido via pipeline até a área de armazenamento(Ex: Datalake). Execução 1x por segundo(Microbatch), etc
+
+
+Streaming - Fluxo/Transmissão: Recebimento de um constante fluxo de dados que são processados conforme novos registros são gerados e enviados para o pipeline. Este formato é utilzado para processar os dados em [tempo real]. Utilizado por exemplo por empresas de transação financeira.
+
+Manter um Streaming de dados é mais custoso que um Batch. (Devido a oneração da rede e complexidade de manutenção?)
+
+
+Datalake:
+
+Repositório de arquivos, podendo estes serem estruturados com formatos (Parquet ou AVRO) ou arquivos semi-estruturados(CSV, JSON) ou arquivos não estruturados(Textos, Áudios, Vídeos)
+
+Datalakes podem armazenar qualquer tipo de arquivos, possuindo o armazenamento praticamente infinito, se tratando de núvem. O Custo é menor, se comparado com o armazenamento limitado que temos em um banco de dados. Porém, é necessário o uso de ferramentas externas para este processamento, ao contrário de bancos de dados que já possuem os SGBDs. 
+
+As ferramentas que trabalham junto ao Datalake, geralmente possuem o processamento distribuido e de larga escala que é necesário para o big data. Podendo funcionar os modelos de Batch e Streaming. 
+
+Um Datalake não substitui um DataWarehouse, ambos se complementam. Por exemplo, os dados armazenados em um datalake podem conforme necessidade serem enviados para um DW. 
+
+É muito utilizado o conceito de ELT ao transferir dados para o DataLake, ficando a parte da transformação para ser realizada posteriormente.
+
+ELT permite que os dados sejam extraídos e carregados, ficando disponível para processamento conforme necessidade. Com os dados armazenados no seu formato "bruto", é possível reprocessar os dados quantas vezes forem necessárias.  
+
+
+--------------------------------------------------------------------------
+
+Ferramentas:
+
+Apache Airflow: Utilizada para orquestração de trabalhos.
+- Agendamento de Jobs para executar em horário programado.
+- Monitorar o estado das execuções. 
+- Todo desenvolvido em Python
+
+
+Apache Spark: Utilizado para processamento distribuído. É um motor analítico unificado para processamento distribuído de dados. 
+- Desenvolcido na linguagem Scala.
+- Principal foco do Spark foi a possibilidade de impalhar funções em um conjunto de dados.
+- Permite desenvolvimento em Java, Scala, Python e R.
+- Permite consulta utilizando SQL
+- Permite o uso da Lib MLlib(Machine learning), GraphX(Processamento de grafos), Spark Streaming(Processamento de Streaming de dados)
+- Um equivalente ao Spark, é o Apache hadoop
+
+
+Hadoop:
+- Map Reduce: Para processamento distrubuído em larga escala
+- HDFS(Hadoop Distri. File System): Sistema de arquivos distribuídos sendo a base do Data Lake na plataforma. 
+- YARN: Plaraforma de gerência de recursos computacionais no cluster.
+
+
+--------------------------------------------------------------------------
+Apache Airflow x Cron(Unix) x Jenkins: (Resumir com próprias palavras)
+
+Em ambas as plataformas o agendamento de scripts não permite a quebra em etapas orquestradas, conhecido como DAG, que significa “gráfico acíclico direcionado”, ou seja, o Jenkins e o Cron permitem simplesmente que o trabalho seja executado, mas não existe nenhuma junção entre as etapas ou execuções.
+
+Para exemplificar, um processo de ETL consiste em 3 etapas bem determinadas que devem ser executadas uma após a outra: a extração, a transformação e a carga. Sendo assim, com sistemas como o Cron ou o Jenkins, você tem 2 opções, criar um único script que executa todos os 3 passos, ou 3 execuções separadas utilizando um horário determinado para cada. Ou seja, se a extração normalmente demora 15 min, a segunda etapa, de transformação, será agendada pelo menos 15 min depois da extração. Isso pode causar tempo ocioso, ou 2 etapas rodando ao mesmo tempo, o que pode não ser proveitoso.
+
+--------------------------------------------------------------------------
+--Passos Início do projeto de Pipeline
+--------------------------------------------------------------------------
+Referência instalação Airflow: https://ilegra.com/blog/organizando-o-palco-instalando-e-configurando-o-airflow-localmente/
+
+#Criar Pasta data-pipeline
+mkdir data-pipeline 
+
+#Acessar pasta
+cd data-pipeline 
+
+# Atualizar OS e adicionar pacote de utilizades
+sudo apt-get update
+sudo apt-get install build-essential
+
+# Instalação de ferramentas adicionais
+sudo apt-get install python3-dev
+pip3 install wheel
+
+#Cria ambiente virtual Python
+python3 -m venv .env 
+
+#Ativa ambiente virtual
+source .env/bin/activate 
+
+#Criando variável de ambiente antes da instalação do #Apache Airflow. ${pwd} retorna a pasta local. Essa variável é utilizada para que o Apache Airflow após instalado faça referência para essa pasta e não diretamente para a pasta raiz do computador. 
+export AIRFLOW_HOME=$(pwd)/airflow #Parte do ponto que esse comando foi executado com o terminal acessando o diretório desejado, para que o pwd retorne o caminho correto.
+
+#instalação do Apache Airflow
+pip3 install apache-airflow==1.10.14 –constraint https://raw.githubusercontent.com/apache/airflow/constraints-1.10.14/constraints-3.8.txt
+
+#Iniciar apache airflow (Configuração padrão SQLite)
+airflow initdb #Inicia o banco de dados para executar a aplicação
+
+---------------------------------------------------------------------------------
+* Após executar esses comandos, será criado a pasta [airflow] dentro do diretório do projeto, que no caso é o [data-pipeline]. Na instalação inicial do Airflow, temos os seguintes arquivos dentro da pasta:
+
+- Pasta Logs: Armazenas os logs de execução do Airflow
+
+- airflow.cfg: Possui todas as configurações do airflow
+
+- airflow.db: Arquivo voltado para uso do SQLite
+
+- unittests.cfg: Configuração de testes unitários para os "DAGS", que são os fluxos de execução.
+---------------------------------------------------------------------------------
+
+AIRFLOW WEBSERVER:
+
+* Com o Airflow instalado e em execução, será necessário levantar alguns serviços, tal como o [Web Server], que é o serviço responsável pela interface gráfica do Airflow
+
+#Ativando a interface gráfica
+airflow webserver
+
+* Ao rodar o comando [airflow webserver] será exibido a informação "Using executor SequentialExecutor" que foi o tipo configurado. 
+
+* Será criado também uma pasta chamada [dags] onde conterá informações dos Dags criados
+
+* Também será possível acessar a interface gráfica do Airflow. Para isso, basta acessar pelo navegador "localhost:8080". Na tela principal, é exibido uma lista de DAGS.
+- Na segunda coluna possui um botão para iniciar/parar os dags
+- coluna Schedule é a frequência que o DAG vai executar. A opção "none" significa que o DAG não será executado automaticamente. Existe também a opção em cron(00***), @daily(diariamente) entre diversos tipos de configuração. 
+- Owner é referente ao dono da tarefa. 
+- recente Tasks: Mostras as tarefas mais recentes. 
+- Last Run: Data da última execição das tarefas. 
+- DAG Runs: Contabiliza as execuções, falhas, etc. 
+- Links: Opções diversas contendo informações sobre o DAG
+
+---------------------------------------------------------------------------------
+
+AIRFLOW SCHEDULER:
+
+* Com o Airflow Scheduler, é possível trabalhar com o agendamento das DAGS. É necessário levantar o serviço com o comando abaixo:
+
+#Ativa serviço de scheduler
+airflow scheduler
+
+
+* Ao ativar o serviço scheduler, dará início o recurso heartbit, chamado de batida do coração, que fica analisando quando os próximos DAGS serão executados. 
+
+* Para executar um DAG manualmente, basta clicar sobre um DAG, onde seremos redirecionados para um página específica onde teremos a opção "Trigger DAG para forçar o início de execução e também diversas opções para visualizar o status de processamento e o desempenho do DAG. 
+
+* O Apache Airflow consegue fazer o controle para definir que uma task é pré-requisito para exeução de outra, de forma a liberar a execução das demais tarefas apenas quando a tarefa pré-requisito for executada com sucesso. 
+
+* Também é possível configurar se a execução das tarefas será feita em paralelo ou sequencial as tarefas podem ser executadas em paralelo, porém as tarefas que são pré-requisitos já devem ter sido executadas. 
+
+
+---------------------------------------------------------------------------------
+-- Consumindo dados do Twitter
+---------------------------------------------------------------------------------
+
+* Será utilizado um código base escrito em Python, disponível em:
+https://github.com/twitterdev/Twitter-API-v2-sample-code/blob/main/Recent-Search/recent_search.py
+
+* Criar o arquivo recent_search.py dentro da pasta [data-pipeline] e adicionar o código no mesmo.
+
+* Após adicionar do código, alimentar o campo "BEARER_TOKEN" 
+
+* exportar a variável de ambiente contendo o token:
+export BEARER_TOKEN=XXXXXXXXXX
+
+---------------------------------------------------------------------------------
+-- Configurando Acesso Apache Airflow
+---------------------------------------------------------------------------------
+
+* Para configurar permissões de acesso ao painel, basta clicar em 
+
+Admin -> Connections
+
+* Será exibido uma lista de conexões padrão. Os dados para conexão são salvos dentro do banco de dados do Apache Airflow.
+
+* Para criar uma nova conexão, basta clicar na aba "Create" ao lado da aba "List" de conexões. 
+(anexar print)
+
+
+--------------------------------------------------------------------------
+-- Gerenciamento de conexões Apache Airflow:
+--------------------------------------------------------------------------
+
+* O Airflow se conecta a diferentes ambientes, para isso é preciso criarmos configurações de conexão fornecendo o endereço do serviço, porta de conexão, login e senha de acesso do serviço a ser acessado. Isso é feito a partir da opçao Admin -> Conexões na UI de Administração do Airflow. 
+
+* O Airflow utiliza a bibioteca do Python chamada Fernet para adicionar encriptação de senha nas configurações das conexões, fazendo com que as senhas fiquem mais seguras no banco de dados do Apache Airflow. 
+
+--------------------------------------------------------------------------
+--Airflow e seus ganchos
+--------------------------------------------------------------------------
+
+* Ganchos são interfaces que realizam a cominicação com o DAG. Possui recursos externos compartilhados, tal como tarefas que podem acessar um mesmo serviço, servindo de exemplo um banco de dados MySQL. Dessa forma, em vez de implementarmos uma conexão para cada tarefa, podemos receber a conexão através de um gancho. 
+
+* Ganchos usam conexões configuradas no Airflow para ter acesso a endereço de serviços e autenticação, fazendo com que o código utilizado pra autenticação e informações relacionadas fiquem desacopladas das regras de negócio do pipeline. 
+
+--------------------------------------------------------------------------
+-- DAGs no Apache Airflow
+--------------------------------------------------------------------------
+
+* DAGs (Gráficos Acíclicos Direcionados). São uma grande vantagem no Apache Airflow. Dags são um conjunto de passos conectados com um início e um fim, sendo que esses passos podem ser executados em sequência ou em paralelo. No Airflow, esses passos são executados através de operadores. 
+
+Características dos operadores:
+
+Idempotência: Idependente do número de vezes que o passo é executado com os mesmos parâmetros, sepre retornará o mesmo resultado. 
+
+Isolamento: As tarefas não vão compartilhar recursos com outras tarefas. É como se fosse executado em ambiente diferente
+
+Atomicidade: Cada operador terá um item indivisível. Por exemplo um processo de ETL é composto por três itens bem definidos, tal como a Extração, a Transformação e a carga. 
+
+
+--------------------------------------------------------------------------
+-- Criando um Operador
+--------------------------------------------------------------------------
+
+* Podemos criar dentro da pasta [hooks], a pasta chamada [operators] e criar o arquivo chamado [twitter_operator.py]
+
+* Um operador, é uma classe dentro do Apache Airflow. 
+
+* Quando um operador é instanciado, ele se torna parte de um nó no DAG. 
+
+* O DAG irá garantir que os operadores sejam executados na ordem correta. 
+
+* Todos os operadores, derivam do operador base chamado BaseOperator, e herdam vários atributos e métodos. 
+
+* Tipos de operadores:
+- Que fazem uma ação ou fazem chamada de uma ação em outro sistema. 
+- Operadores para mover dados de um sistema para outro. 
+- Operadores usados como sensores, que executam até que determinado critério seja atingido. Por exemplo métodos "poke", que testam um critério até que este se torne verdadeiro ou "True", usam o "poke_interval" para determinar a frequência de execução do teste. 
+
+
+* Podemos dizer que Operadores são os objetos mais importantes no Airflow, visto que sem os Operadores, nenhuma tarefa pode ser executada. Tarefas no Airflow são uma implementação de um Operador. Nessa implementação do operador é configurado parâmetros específicos, fazendo com que cada tarefa seja única para o conjunto de parâmetros. 
+
+--------------------------------------------------------------------------
+-- Salvando dados extraídos
+--------------------------------------------------------------------------
+
+* Ao rodar um operador, podemos fazer com que o mesmo crie arquivos por exemplo json para armazenar os dados extraídos. 
+
+* Essas instruções para consumir os dados e gerar o arquivo pode ser feito via linguagem Python.
+
+* A finalidade do Data Lake é armazenar os dados da forma mais bruta possíbel, ou seja, mais parecida com a forma que foram extraídas, podendo estes dados serem reprocessados mediante necessidade.
+
+
+--------------------------------------------------------------------------
+-- Criação de Plugins no Apache Airflow
+--------------------------------------------------------------------------
+
+* Analisar os Plugins no Apache Airflow. (A fazer) 
+
+--------------------------------------------------------------------------
+Pesquisar mais sobre Parquet/AVRO
+
+Apache HIVE: Ferramenta que permite pesquisa em HDFS utilizando SQL. 
+
+* Estudar sobre Macros Apache Airflow
+
+* Estudar plugins no Apache Airflow
+
+--------------------------------------------------------------------------
+-- ATENÇÃO
+--------------------------------------------------------------------------
+* Antes de executar comandos no Apache Airflow, é necessário acessar a pasta do projeto pelo terminal e ativar o ambiente virtual Python e exportar a variável de ambiente
+
+Ex:
+ - cd diretorio-projeto
+ - source .env/bin/activate 
+ - export AIRFLOW_HOME=$(pwd)/airflow
+
+* Plugins na versão 2.0 do Airflow:
+https://airflow.apache.org/docs/apache-airflow/stable/modules_management.html
+
+--------------------------------------------------------------------------
+-- Spark
+--------------------------------------------------------------------------
+
+* É uma ferramenta versatil que permite o processamento distribuído em cluster de máquinas ou em apenas uma máquina. 
+
+* O Spark pode ser instalado em máquinas Windows, MAC e Linux. Roda a partir do Java 8. 
+
+
+* Instalação do Spark:
+ - https://spark.apache.org/downloads.html
+
+
+# Spark Submit (Extraindo dados do Datalake a partir do script transformation.py criado no projeto)
+* ./bin/spark-submit /home/laender/Documentos/Github/apache-airflow/data-pipeline/spark/transformation.py
+
+# Executanto o Pyspark. Basta acessar a pasta do Spark e executar o comando abaixo:
+./bin/pyspark
+
+* Após levantado o serviço do Pyspark, vamos criar o RDD(Conjunto de dados distribuído Resiliente), que é o conjunto de dados mais simples que temos no Spark. 
+
+tweet_df = df.select(explode("data").alias("tweets")).select("tweets.author_id", "tweets.conversation_id", "tweets.public_metrics.*", "tweets.text")
+
+tweet_df.write.mode("overwrite").option("header", True).csv("/home/laender/Documentos/Github/apache-airflow/data-pipeline/datalake/export")
+
+tweet_df.rdd.getNumPartitions()
+
+#Divide a quantidade de registros por arquivos, no caso em 2 arquivos csv. 
+tweet_df.repartition(2).write.mode("overwrite").option("header", True).csv("/home/laender/Documentos/Github/apache-airflow/data-pipeline/datalake/export2")
+ 
+from pyspark.sql.functions import to_date
+
+tweet_df.groupBy(to_date("created_at")).count().show()
+
+export_df = tweet_df.withColumn("created_date", to_date("created_at")).repartition("created_date")
+
+export_df.write.mode("overwrite").partitionBy("created_date").json("/home/laender/Documentos/Github/apache-airflow/data-pipeline/datalake/export")
+
+read_df = spark.read.json("/home/laender/Documentos/Github/apache-airflow/data-pipeline/datalake/export")
+
+#exibe plano de execução.
+read_df.where("created_date = '2021-03-03'").explain()
+
+--------------------------------------------------------------------------
+-- Organização DataLake por pastas
+--------------------------------------------------------------------------
+
+Bronze: Dados brutos, mais parecido possível com a forma que foi extraído. 
+
+Silver: Possui os dados transformados.
+
+Gold: Dados devidamente tratados para realização de análises. 
+
+--------------------------------------------------------------------------
+* Instalação do PySpark:
+--------------------------------------------------------------------------
+
+PySpark é uma versão do Spark para Python:
+
+python3 -m pip install pyspark
+
+--------------------------------------------------------------------------

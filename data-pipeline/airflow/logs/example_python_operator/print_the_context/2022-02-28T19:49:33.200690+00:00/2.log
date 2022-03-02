@@ -1,0 +1,52 @@
+[2022-02-28 16:53:16,686] {taskinstance.py:670} INFO - Dependencies all met for <TaskInstance: example_python_operator.print_the_context 2022-02-28T19:49:33.200690+00:00 [queued]>
+[2022-02-28 16:53:16,699] {taskinstance.py:670} INFO - Dependencies all met for <TaskInstance: example_python_operator.print_the_context 2022-02-28T19:49:33.200690+00:00 [queued]>
+[2022-02-28 16:53:16,699] {taskinstance.py:880} INFO - 
+--------------------------------------------------------------------------------
+[2022-02-28 16:53:16,699] {taskinstance.py:881} INFO - Starting attempt 2 of 2
+[2022-02-28 16:53:16,699] {taskinstance.py:882} INFO - 
+--------------------------------------------------------------------------------
+[2022-02-28 16:53:16,712] {taskinstance.py:901} INFO - Executing <Task(PythonOperator): print_the_context> on 2022-02-28T19:49:33.200690+00:00
+[2022-02-28 16:53:16,716] {standard_task_runner.py:54} INFO - Started process 46388 to run task
+[2022-02-28 16:53:16,809] {standard_task_runner.py:77} INFO - Running: ['airflow', 'run', 'example_python_operator', 'print_the_context', '2022-02-28T19:49:33.200690+00:00', '--job_id', '8', '--pool', 'default_pool', '--raw', '-sd', '/home/laender/Documentos/Github/apache-airflow/data-pipeline/.env/lib/python3.8/site-packages/airflow/example_dags/example_python_operator.py', '--cfg_path', '/tmp/tmpi2vuir7n']
+[2022-02-28 16:53:16,810] {standard_task_runner.py:78} INFO - Job 8: Subtask print_the_context
+[2022-02-28 16:53:16,839] {logging_mixin.py:112} INFO - Running <TaskInstance: example_python_operator.print_the_context 2022-02-28T19:49:33.200690+00:00 [running]> on host laender-Inspiron-5547
+[2022-02-28 16:53:16,884] {logging_mixin.py:112} INFO - {'END_DATE': '2022-02-28',
+ 'conf': <airflow.configuration.AirflowConfigParser object at 0x7f0b2a683520>,
+ 'dag': <DAG: example_python_operator>,
+ 'dag_run': <DagRun example_python_operator @ 2022-02-28 19:49:33.200690+00:00: manual__2022-02-28T19:49:33.200690+00:00, externally triggered: True>,
+ 'ds_nodash': '20220228',
+ 'end_date': '2022-02-28',
+ 'execution_date': <Pendulum [2022-02-28T19:49:33.200690+00:00]>,
+ 'inlets': [],
+ 'latest_date': '2022-02-28',
+ 'macros': <module 'airflow.macros' from '/home/laender/Documentos/Github/apache-airflow/data-pipeline/.env/lib/python3.8/site-packages/airflow/macros/__init__.py'>,
+ 'next_ds': '2022-02-28',
+ 'next_ds_nodash': '20220228',
+ 'next_execution_date': <Pendulum [2022-02-28T19:49:33.200690+00:00]>,
+ 'outlets': [],
+ 'params': {},
+ 'prev_ds': '2022-02-28',
+ 'prev_ds_nodash': '20220228',
+ 'prev_execution_date': <Pendulum [2022-02-28T19:49:33.200690+00:00]>,
+ 'prev_execution_date_success': <Proxy at 0x7f0b1b4def40 with factory <function TaskInstance.get_template_context.<locals>.<lambda> at 0x7f0b1b4dd4c0>>,
+ 'prev_start_date_success': <Proxy at 0x7f0b1b4de840 with factory <function TaskInstance.get_template_context.<locals>.<lambda> at 0x7f0b1b4e6310>>,
+ 'run_id': 'manual__2022-02-28T19:49:33.200690+00:00',
+ 'tables': None,
+ 'task': <Task(PythonOperator): print_the_context>,
+ 'task_instance': <TaskInstance: example_python_operator.print_the_context 2022-02-28T19:49:33.200690+00:00 [running]>,
+ 'task_instance_key_str': 'example_python_operator__print_the_context__20220228',
+ 'templates_dict': None,
+ 'test_mode': False,
+ 'ti': <TaskInstance: example_python_operator.print_the_context 2022-02-28T19:49:33.200690+00:00 [running]>,
+ 'tomorrow_ds': '2022-03-01',
+ 'tomorrow_ds_nodash': '20220301',
+ 'ts': '2022-02-28T19:49:33.200690+00:00',
+ 'ts_nodash': '20220228T194933',
+ 'ts_nodash_with_tz': '20220228T194933.200690+0000',
+ 'var': {'json': None, 'value': None},
+ 'yesterday_ds': '2022-02-27',
+ 'yesterday_ds_nodash': '20220227'}
+[2022-02-28 16:53:16,884] {logging_mixin.py:112} INFO - 2022-02-28
+[2022-02-28 16:53:16,885] {python_operator.py:114} INFO - Done. Returned value was: Whatever you return gets printed in the logs
+[2022-02-28 16:53:16,902] {taskinstance.py:1057} INFO - Marking task as SUCCESS.dag_id=example_python_operator, task_id=print_the_context, execution_date=20220228T194933, start_date=20220228T195316, end_date=20220228T195316
+[2022-02-28 16:53:21,692] {local_task_job.py:102} INFO - Task exited with return code 0
